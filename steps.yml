@@ -1,0 +1,9 @@
+- Name: Do it
+  Command: echo "Doing it!"
+
+- Name: build backend
+  Parallel: true
+  Steps:
+    - Command: echo "make foo"
+    - Command: echo "make bar"
+    - Command: echo "make baz"

@@ -1,0 +1,6 @@
+package: github.com/ionrock/buildenv
+import:
+- package: github.com/Sirupsen/logrus
+- package: github.com/codegangsta/cli
+- package: github.com/flynn/go-shlex
+- package: github.com/spf13/viper

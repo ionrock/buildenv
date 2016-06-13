@@ -4,6 +4,12 @@
 - Name: build backend
   Parallel: true
   Steps:
-    - Command: echo "make foo"
-    - Command: echo "make bar"
-    - Command: echo "make baz"
+
+    - Name: build foo
+      Command: echo "make foo"
+
+    - Name: build bar
+      Command: echo "make bar"
+
+    - Name: build baz
+      Command: echo "make baz"

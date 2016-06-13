@@ -2,11 +2,10 @@ package main
 
 import (
 	"io/ioutil"
-	"os"
-	"os/exec"
+	"sync"
 
 	log "github.com/Sirupsen/logrus"
-	shlex "github.com/flynn/go-shlex"
+
 	"github.com/ghodss/yaml"
 )
 
@@ -17,27 +16,45 @@ type Step struct {
 	Steps    []Step
 }
 
-func (s *Step) Cmd() (*exec.Cmd, error) {
-	parts, err := shlex.Split(s.Command)
-	if err != nil {
-		return nil, err
+func (s *Step) Debug() {
+	log.Debugf("Name: %#v", s.Name)
+	log.Debugf("Command: %#v", s.Command)
+	log.Debugf("Parallel: %#v", s.Parallel)
+	for i, step := range s.Steps {
+		log.Debug("Steps: ", i)
+		step.Debug()
 	}
-
-	cmd := exec.Command(parts[0], parts[1:]...)
-	return cmd, nil
 }
 
-func (s Step) Do() error {
-	cmd, err := s.Cmd()
-	if err != nil {
-		log.Fatal(err)
+func (s *Step) DoParallel() error {
+	var wg sync.WaitGroup
+
+	errs := MultiError{}
+
+	for _, step := range s.Steps {
+		wg.Add(1)
+		go func(s Step) {
+			defer wg.Done()
+			err := s.Do()
+			if err != nil {
+				errs.Errors = append(errs.Errors, err)
+			}
+		}(step)
 	}
 
-	// TODO: watch with logging
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	wg.Wait()
+	return errs.GetError()
+}
 
-	return cmd.Run()
+func (s *Step) Do() error {
+	if s.Parallel {
+		return s.DoParallel()
+	}
+
+	if s.Command != "" {
+		return DoCommand(s.Command)
+	}
+	return nil
 }
 
 func LoadSteps(path string) []Step {
@@ -56,9 +73,13 @@ func LoadSteps(path string) []Step {
 	return steps
 }
 
-func Build(steps []Step) {
+func Build(steps []Step) error {
 	for _, step := range steps {
 		log.Info("Running: ", step.Name)
-		step.Do()
+		err := step.Do()
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

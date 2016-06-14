@@ -30,7 +30,9 @@ func BuildEnv(c *cli.Context) error {
 	log.Info("Loading: ", c.String("steps"))
 	steps := LoadSteps(c.String("steps"))
 
-	log.Info(steps)
+	for _, step := range steps {
+		step.Debug()
+	}
 	Build(steps)
 
 	return nil

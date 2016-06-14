@@ -12,6 +12,7 @@ import (
 type Step struct {
 	Name     string
 	Command  string
+	Retry    int
 	Parallel bool
 	Steps    []Step
 }
@@ -47,13 +48,33 @@ func (s *Step) DoParallel() error {
 }
 
 func (s *Step) Do() error {
-	if s.Parallel {
-		return s.DoParallel()
+	if s.Retry == 0 {
+		s.Retry = 1
+	}
+	var err error
+
+	if len(s.Steps) > 0 {
+		for retry := 0; retry <= s.Retry; retry++ {
+			err = s.DoParallel()
+			if err == nil {
+				break
+			}
+		}
+		return err
 	}
 
 	if s.Command != "" {
-		return DoCommand(s.Command)
+		for retry := 0; retry <= s.Retry; retry++ {
+			log.Info("Try: ", retry+1)
+			err = DoCommand(s.Command)
+			if err == nil {
+				break
+			}
+		}
+		return err
 	}
+
+	// TODO: Return an invalid step error
 	return nil
 }
 

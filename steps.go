@@ -78,7 +78,7 @@ func Build(steps []Step) error {
 		log.Info("Running: ", step.Name)
 		err := step.Do()
 		if err != nil {
-			return err
+			log.Error(err)
 		}
 	}
 	return nil

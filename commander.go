@@ -18,7 +18,7 @@ func splitCommand(command string) ([]string, error) {
 	return parts, nil
 }
 
-func watchCommand(c *exec.Cmd) {
+func watchCommand(c *exec.Cmd, prefix string) {
 	o, err := c.StdoutPipe()
 	if err != nil {
 		log.Fatal("Error creating stdout pipe: ", err)
@@ -33,25 +33,25 @@ func watchCommand(c *exec.Cmd) {
 	stderr := bufio.NewScanner(e)
 	go func() {
 		for stdout.Scan() {
-			log.Infof("[stdout %d] %s", c.Process.Pid, stdout.Text())
+			log.Infof("[stdout %s %d] %s", prefix, c.Process.Pid, stdout.Text())
 		}
 	}()
 
 	go func() {
 		for stderr.Scan() {
-			log.Infof("[stderr %d] %s", c.Process.Pid, stderr.Text())
+			log.Infof("[stderr %s %d] %s", prefix, c.Process.Pid, stderr.Text())
 		}
 	}()
 }
 
-func DoCommand(c string) error {
+func DoCommand(c string, prefix string) error {
 	parts, err := splitCommand(c)
 	if err != nil {
 		log.Fatal(err)
 	}
 	cmd := exec.Command(parts[0], parts[1:]...)
 
-	watchCommand(cmd)
+	watchCommand(cmd, prefix)
 
 	err = cmd.Start()
 	if err != nil {

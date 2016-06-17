@@ -27,7 +27,11 @@ func (s *Step) Debug() {
 	}
 }
 
-func (s *Step) DoParallel() error {
+func (s *Step) DoStep() error {
+	if s.Command != "" {
+		return DoCommand(s.Command, s.Name)
+	}
+
 	var wg sync.WaitGroup
 
 	errs := MultiError{}
@@ -52,30 +56,14 @@ func (s *Step) Do() error {
 		s.Retry = 1
 	}
 	var err error
-
-	if len(s.Steps) > 0 {
-		for retry := 0; retry <= s.Retry; retry++ {
-			err = s.DoParallel()
-			if err == nil {
-				break
-			}
+	for retry := 0; retry <= s.Retry; retry++ {
+		err = s.DoStep()
+		if err == nil {
+			break
 		}
-		return err
 	}
 
-	if s.Command != "" {
-		for retry := 0; retry <= s.Retry; retry++ {
-			log.Info("Try: ", retry+1)
-			err = DoCommand(s.Command)
-			if err == nil {
-				break
-			}
-		}
-		return err
-	}
-
-	// TODO: Return an invalid step error
-	return nil
+	return err
 }
 
 func LoadSteps(path string) []Step {

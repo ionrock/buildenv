@@ -12,6 +12,7 @@ import (
 type Step struct {
 	Name     string
 	Command  string
+	OnFail   string
 	Retry    int
 	Parallel bool
 	Steps    []Step
@@ -60,6 +61,13 @@ func (s *Step) Do() error {
 		err = s.DoStep()
 		if err == nil {
 			break
+		}
+		if s.OnFail != "" {
+			log.Info("Error in Step %s. Running on fail command: %s", s.Name, s.OnFail)
+			err = DoCommand(s.OnFail, s.Name)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 

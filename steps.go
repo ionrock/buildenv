@@ -2,9 +2,8 @@ package main
 
 import (
 	"io/ioutil"
+	"log"
 	"sync"
-
-	log "github.com/Sirupsen/logrus"
 
 	"github.com/ghodss/yaml"
 )
@@ -19,11 +18,11 @@ type Step struct {
 }
 
 func (s *Step) Debug() {
-	log.Debugf("Name: %#v", s.Name)
-	log.Debugf("Command: %#v", s.Command)
-	log.Debugf("Parallel: %#v", s.Parallel)
+	Debugf("Name: %#v", s.Name)
+	Debugf("Command: %#v", s.Command)
+	Debugf("Parallel: %#v", s.Parallel)
 	for i, step := range s.Steps {
-		log.Debug("Steps: ", i)
+		Debug("Steps: ", i)
 		step.Debug()
 	}
 }
@@ -63,7 +62,7 @@ func (s *Step) Do() error {
 			break
 		}
 		if s.OnFail != "" {
-			log.Info("Error in Step %s. Running on fail command: %s", s.Name, s.OnFail)
+			log.Print("Error in Step %s. Running on fail command: %s", s.Name, s.OnFail)
 			err = DoCommand(s.OnFail, s.Name)
 			if err != nil {
 				log.Fatal(err)
@@ -92,10 +91,10 @@ func LoadSteps(path string) []Step {
 
 func Build(steps []Step) error {
 	for _, step := range steps {
-		log.Info("Running: ", step.Name)
+		log.Print("Running: ", step.Name)
 		err := step.Do()
 		if err != nil {
-			log.Error(err)
+			log.Print(err)
 		}
 	}
 	return nil

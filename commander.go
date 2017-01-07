@@ -2,10 +2,10 @@ package main
 
 import (
 	"bufio"
+	"log"
 	"os"
 	"os/exec"
 
-	log "github.com/Sirupsen/logrus"
 	shlex "github.com/flynn/go-shlex"
 )
 
@@ -33,13 +33,13 @@ func watchCommand(c *exec.Cmd, prefix string) {
 	stderr := bufio.NewScanner(e)
 	go func() {
 		for stdout.Scan() {
-			log.Infof("[stdout %s %d] %s", prefix, c.Process.Pid, stdout.Text())
+			log.Printf("[stdout %s %d] %s", prefix, c.Process.Pid, stdout.Text())
 		}
 	}()
 
 	go func() {
 		for stderr.Scan() {
-			log.Infof("[stderr %s %d] %s", prefix, c.Process.Pid, stderr.Text())
+			log.Printf("[stderr %s %d] %s", prefix, c.Process.Pid, stderr.Text())
 		}
 	}()
 }

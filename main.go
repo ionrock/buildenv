@@ -1,33 +1,14 @@
 package main
 
 import (
+	"log"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/codegangsta/cli"
-	"github.com/spf13/viper"
+	"github.com/urfave/cli"
 )
 
-func init() {
-	viper.SetConfigName("buildenv")
-	viper.AddConfigPath("/etc/buildenv/")
-	viper.AddConfigPath(".")
-	err := viper.ReadInConfig()
-	if err != nil { // Handle errors reading the config file
-		log.Error("Fatal error config file: %s", err)
-	}
-
-	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
-
-	if viper.GetBool("debug") == true {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
-}
-
 func BuildEnv(c *cli.Context) error {
-	log.Info("Loading: ", c.String("steps"))
+	log.Print("Loading: ", c.String("steps"))
 	steps := LoadSteps(c.String("steps"))
 
 	for _, step := range steps {

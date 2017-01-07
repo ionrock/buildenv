@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
+	"log"
 	"testing"
 )
 
@@ -21,12 +21,12 @@ func TestLoadSteps(t *testing.T) {
 		t.Error(err)
 	}
 
-	log.Infof("%#v", steps)
+	log.Printf("%#v", steps)
 }
 
 func TestLoadStepsFromFile(t *testing.T) {
 	steps := LoadSteps("steps.yml")
-	log.Infof("%#v", steps)
+	log.Printf("%#v", steps)
 	if len(steps) != 2 {
 		t.Fail()
 	}
